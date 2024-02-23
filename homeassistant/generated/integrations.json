@@ -6104,6 +6104,12 @@
       "config_flow": true,
       "iot_class": "local_push"
     },
+    "tinxy": {
+      "name": "Tinxy Local",
+      "integration_type": "hub",
+      "config_flow": true,
+      "iot_class": "local_polling"
+    },
     "tmb": {
       "name": "Transports Metropolitans de Barcelona",
       "integration_type": "hub",
