@@ -26,7 +26,9 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 
 class TinxyHub:
-    def __init__(self, host: str) -> bool:
+    """Now tinxy hub."""
+
+    def __init__(self, host: str) -> None:
         """Initialize."""
 
         self.host = host

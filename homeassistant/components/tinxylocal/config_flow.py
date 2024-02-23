@@ -1,20 +1,19 @@
 """Config flow for Tinxy Local integration."""
 from __future__ import annotations
 
-import base64
 import logging
-import time
+import requests
 from typing import Any
 
-import requests
-from tinxy import tinxy
+
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_API_KEY, CONF_HOST, CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_HOST, CONF_API_KEY
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from tinxy import tinxy
 
 from .const import DOMAIN
 
@@ -35,27 +34,12 @@ class TinxyLocalHub:
     TODO Remove this placeholder class and replace with things from your PyPI package.
     """
 
-    def __init__(self, host: str) -> None:
+    def __init__(self) -> None:
         """Initialize."""
-        self.host = host
 
-    def encrypts(self, mqttPass):
-        """Generate API key."""
-        tm = str(int(time.time()))
-        en_tm = tinxy.strToLongs(tm.encode("utf-8").decode())
-        en_mqttpass = tinxy.strToLongs(mqttPass.encode("utf-8").decode())
-        ed = tinxy.encodes(en_tm, en_mqttpass)
-        ciphertext = tinxy.longsToStr(ed)
-        cipherutf2 = ciphertext.encode("latin-1")
-        cipherbase64 = base64.b64encode(cipherutf2)
-        return base64.b64decode(cipherbase64).hex()
-
-    async def authenticate(self, apiKey: str) -> bool:
+    async def authenticate(self, host: str, api_key: str) -> bool:
         """Test if we can authenticate with the host."""
-        response = requests.post(
-            self.host + "/toggle",
-            json={"password": data, "action": "1", "relayNumber": 2},
-        )
+        return True
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
@@ -71,9 +55,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     #     your_validate_func, data[CONF_USERNAME], data[CONF_PASSWORD]
     # )
 
-    hub = PlaceholderHub(data[CONF_HOST])
+    hub = TinxyLocalHub()
 
-    if not await hub.authenticate(data[CONF_USERNAME], data[CONF_PASSWORD]):
+    if not await hub.authenticate(data[CONF_HOST], data[CONF_API_KEY]):
         raise InvalidAuth
 
     # If you cannot connect:
