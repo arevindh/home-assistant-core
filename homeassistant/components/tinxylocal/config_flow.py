@@ -17,7 +17,6 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
-    CONF_ACTION,
     CONF_ADD_DEVICE,
     CONF_DEVICE_ID,
     CONF_EDIT_DEVICE,

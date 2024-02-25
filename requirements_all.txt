@@ -2712,7 +2712,7 @@ tikteck==0.4
 tilt-ble==0.2.3
 
 # homeassistant.components.tinxylocal
-tinxy==0.2.4
+tinxy==0.2.5
 
 # homeassistant.components.tmb
 tmb==0.0.4

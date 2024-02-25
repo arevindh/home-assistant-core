@@ -2068,7 +2068,7 @@ thermopro-ble==0.10.0
 tilt-ble==0.2.3
 
 # homeassistant.components.tinxylocal
-tinxy==0.2.4
+tinxy==0.2.5
 
 # homeassistant.components.todoist
 todoist-api-python==2.1.2
