@@ -533,6 +533,7 @@ FLOWS = {
         "tile",
         "tilt_ble",
         "time_date",
+        "tinxylocal",
         "todoist",
         "tolo",
         "tomorrowio",
