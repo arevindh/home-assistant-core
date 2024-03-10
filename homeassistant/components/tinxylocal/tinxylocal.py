@@ -53,6 +53,24 @@ class TinxyLocal:
         self.host_config = host_config
         self.web_session = web_session
 
+    def digit_key_value_pairs(self, text: str) -> dict:
+        """Convert a string of digits into a dictionary with key-value pairs for each digit."""
+        result = {}
+        for i, digit in enumerate(text):
+            result[i] = int(digit)  # Convert digit to integer
+        return result
+
+    async def get_states(self) -> dict | bool:
+        """Get current states of device."""
+        result = await self.api_request("", None, "GET")
+        if result is not False:
+            digits = self.digit_key_value_pairs(result.state)
+            return digits
+        return False
+
+    async def turn_on(self, realy_number: int, state: dict) -> dict:
+        """Turn on device."""
+
     async def api_request(self, path: str, payload: dict, method="GET") -> dict:
         """Tinxy api requests requests."""
 
