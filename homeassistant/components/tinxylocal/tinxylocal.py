@@ -41,6 +41,8 @@ class TinxyLocalHostConfiguration:
 
 
 class TinxyLocal:
+    """Main class for tinxy."""
+
     DOMAIN = "tinxy"
     CONF_MQTT_PASS = "mqtt_pass"
     CONF_API_TOKEN = "api_token"

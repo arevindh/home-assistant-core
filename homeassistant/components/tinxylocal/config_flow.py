@@ -239,12 +239,22 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.error(
                     {self.mqtt_pass, self.device_uuid, self.host}, exc_info=device
                 )
+                _LOGGER.error(device, exc_info=device)
 
                 data = await toggle_device(self.hass, self.host, self.mqtt_pass, 1, 0)
 
                 return self.async_create_entry(
-                    title=self.device_uuid,
+                    title=device["name"],
                     data={
+                        "device": {
+                            "model": device["typeId"]["name"],
+                            "devices": device["devices"],
+                            "device_types": device["deviceTypes"],
+                            "firmware_version": device["firmwareVersion"],
+                            "name": device["name"],
+                            "type": device["typeId"],
+                            "uuid_ref": device["uuidRef"],
+                        },
                         CONF_HOST: self.host,
                         CONF_MQTT_PASS: self.mqtt_pass,
                         CONF_DEVICE_ID: self.device_uuid,
