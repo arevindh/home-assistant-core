@@ -323,11 +323,11 @@ class TinxyCloud:
             return "mdi:radiator"
         elif devicetype == "Tubelight":
             return "mdi:lightbulb-fluorescent-tube"
-        elif (
-            devicetype == "LED Bulb"
-            or devicetype == "Dimmable Light"
-            or devicetype == "LED Dimmable Bulb"
-            or devicetype == "EVA_BULB"
+        elif devicetype in (
+            "LED Bulb",
+            "Dimmable Light",
+            "LED Dimmable Bulb",
+            "EVA_BULB",
         ):
             return "mdi:lightbulb"
         elif devicetype == "Music System":

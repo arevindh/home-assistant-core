@@ -24,6 +24,7 @@ from .const import (
     CONF_SETUP_CLOUD,
     DOMAIN,
     TINXY_BACKEND,
+    CONF_DEVICE,
 )
 from .tinxycloud import TinxyCloud, TinxyHostConfiguration
 
@@ -246,15 +247,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(
                     title=device["name"],
                     data={
-                        "device": {
-                            "model": device["typeId"]["name"],
-                            "devices": device["devices"],
-                            "device_types": device["deviceTypes"],
-                            "firmware_version": device["firmwareVersion"],
-                            "name": device["name"],
-                            "type": device["typeId"],
-                            "uuid_ref": device["uuidRef"],
-                        },
+                        CONF_DEVICE: device,
                         CONF_HOST: self.host,
                         CONF_MQTT_PASS: self.mqtt_pass,
                         CONF_DEVICE_ID: self.device_uuid,

@@ -6,7 +6,7 @@ from homeassistant.const import CONF_API_KEY, CONF_HOST, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import CONF_MQTT_PASS, DOMAIN
+from .const import CONF_MQTT_PASS, DOMAIN, CONF_DEVICE
 from .coordinator import TinxyUpdateCoordinator
 from .tinxylocal import TinxyLocal, TinxyLocalHostConfiguration
 
@@ -26,6 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         api_token=entry.data[CONF_API_KEY],
         mqtt_pass=entry.data[CONF_MQTT_PASS],
         host=entry.data[CONF_HOST],
+        device_id=entry.data[CONF_DEVICE]["_id"],
     )
 
     api = TinxyLocal(host_config=host_config, web_session=web_session)

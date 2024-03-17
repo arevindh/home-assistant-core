@@ -11,7 +11,7 @@ from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 # from .tinxycloud import TinxyAuthenticationException, TinxyException
-from .tinxylocal import TinxyAuthenticationException, TinxyLocal
+from .tinxylocal import TinxyAuthenticationException, TinxyLocal, TinxyLocalException
 
 # from homeassistant.exceptions import
 
@@ -67,5 +67,5 @@ class TinxyUpdateCoordinator(DataUpdateCoordinator):
             # Raising ConfigEntryAuthFailed will cancel future updates
             # and start a config flow with SOURCE_REAUTH (async_step_reauth)
             raise ConfigEntryAuthFailed from err
-        except TinxyException as err:
+        except TinxyLocalException as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
