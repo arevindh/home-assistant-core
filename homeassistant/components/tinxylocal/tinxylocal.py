@@ -25,7 +25,6 @@ class TinxyLocalHostConfiguration:
 
     api_token: str
     mqtt_pass: str
-    device_uuid: str
     host: str
 
     def __post_init__(self):

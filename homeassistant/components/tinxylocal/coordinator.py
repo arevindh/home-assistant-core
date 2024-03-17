@@ -7,10 +7,11 @@ import async_timeout
 
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.debounce import Debouncer
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .tinxycloud import TinxyAuthenticationException, TinxyException
+# from .tinxycloud import TinxyAuthenticationException, TinxyException
+from .tinxylocal import TinxyAuthenticationException, TinxyLocal
 
 # from homeassistant.exceptions import
 
@@ -22,7 +23,7 @@ REQUEST_REFRESH_DELAY = 0.35
 class TinxyUpdateCoordinator(DataUpdateCoordinator):
     """My custom coordinator."""
 
-    def __init__(self, hass: HomeAssistant, my_api) -> None:
+    def __init__(self, hass: HomeAssistant, my_api: TinxyLocal) -> None:
         """Initialize my coordinator."""
         super().__init__(
             hass,
@@ -37,7 +38,7 @@ class TinxyUpdateCoordinator(DataUpdateCoordinator):
         )
         # my_api.list_all
         self.hass = hass
-        self.my_api = my_api
+        self.my_api = my_api.get_states()
         self.all_devices = self.my_api.list_all_devices()
 
     async def _async_update_data(self):
