@@ -1,15 +1,12 @@
 """Support for Tile device trackers."""
+
 from __future__ import annotations
 
 import logging
 
 from pytile.tile import Tile
 
-from homeassistant.components.device_tracker import (
-    AsyncSeeCallback,
-    SourceType,
-    TrackerEntity,
-)
+from homeassistant.components.device_tracker import AsyncSeeCallback, TrackerEntity
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant, callback
@@ -36,8 +33,6 @@ ATTR_LAST_TIMESTAMP = "last_timestamp"
 ATTR_RING_STATE = "ring_state"
 ATTR_TILE_NAME = "tile_name"
 ATTR_VOIP_STATE = "voip_state"
-
-DEFAULT_ICON = "mdi:view-grid"
 
 
 async def async_setup_entry(
@@ -72,7 +67,7 @@ async def async_setup_scanner(
         )
     )
 
-    _LOGGER.info(
+    _LOGGER.debug(
         "Your Tile configuration has been imported into the UI; "
         "please remove it from configuration.yaml"
     )
@@ -83,9 +78,9 @@ async def async_setup_scanner(
 class TileDeviceTracker(CoordinatorEntity[DataUpdateCoordinator[None]], TrackerEntity):
     """Representation of a network infrastructure device."""
 
-    _attr_icon = DEFAULT_ICON
     _attr_has_entity_name = True
     _attr_name = None
+    _attr_translation_key = "tile"
 
     def __init__(
         self, entry: ConfigEntry, coordinator: DataUpdateCoordinator[None], tile: Tile
@@ -131,11 +126,6 @@ class TileDeviceTracker(CoordinatorEntity[DataUpdateCoordinator[None]], TrackerE
         if not self._tile.longitude:
             return None
         return self._tile.longitude
-
-    @property
-    def source_type(self) -> SourceType:
-        """Return the source type, eg gps or router, of the device."""
-        return SourceType.GPS
 
     @callback
     def _handle_coordinator_update(self) -> None:

@@ -1,9 +1,10 @@
 """Support for Vodafone Station routers."""
+
 from __future__ import annotations
 
 from aiovodafone import VodafoneStationDevice
 
-from homeassistant.components.device_tracker import ScannerEntity, SourceType
+from homeassistant.components.device_tracker import ScannerEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -61,6 +62,8 @@ def async_add_new_tracked_entities(
 class VodafoneStationTracker(CoordinatorEntity[VodafoneStationRouter], ScannerEntity):
     """Representation of a Vodafone Station device."""
 
+    _attr_translation_key = "device_tracker"
+
     def __init__(
         self, coordinator: VodafoneStationRouter, device_info: VodafoneStationDeviceInfo
     ) -> None:
@@ -89,19 +92,9 @@ class VodafoneStationTracker(CoordinatorEntity[VodafoneStationRouter], ScannerEn
         return self._device_info.home
 
     @property
-    def source_type(self) -> SourceType:
-        """Return the source type."""
-        return SourceType.ROUTER
-
-    @property
     def hostname(self) -> str | None:
         """Return the hostname of device."""
         return self._attr_name
-
-    @property
-    def icon(self) -> str:
-        """Return device icon."""
-        return "mdi:lan-connect" if self._device.connected else "mdi:lan-disconnect"
 
     @property
     def ip_address(self) -> str | None:

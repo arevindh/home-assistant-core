@@ -1,4 +1,5 @@
 """The ReCollect Waste integration."""
+
 from __future__ import annotations
 
 from datetime import date, timedelta
@@ -108,6 +109,6 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         await er.async_migrate_entries(hass, entry.entry_id, migrate_unique_id)
 
-    LOGGER.info("Migration to version %s successful", version)
+    LOGGER.debug("Migration to version %s successful", version)
 
     return True

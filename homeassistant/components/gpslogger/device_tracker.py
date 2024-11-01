@@ -1,5 +1,6 @@
 """Support for the GPSLogger device tracking."""
-from homeassistant.components.device_tracker import SourceType, TrackerEntity
+
+from homeassistant.components.device_tracker import TrackerEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_BATTERY_LEVEL,
@@ -39,17 +40,16 @@ async def async_setup_entry(
 
         async_add_entities([GPSLoggerEntity(device, gps, battery, accuracy, attrs)])
 
-    hass.data[GPL_DOMAIN]["unsub_device_tracker"][
-        entry.entry_id
-    ] = async_dispatcher_connect(hass, TRACKER_UPDATE, _receive_data)
+    hass.data[GPL_DOMAIN]["unsub_device_tracker"][entry.entry_id] = (
+        async_dispatcher_connect(hass, TRACKER_UPDATE, _receive_data)
+    )
 
     # Restore previously loaded devices
     dev_reg = dr.async_get(hass)
     dev_ids = {
         identifier[1]
-        for device in dev_reg.devices.values()
+        for device in dev_reg.devices.get_devices_for_config_entry_id(entry.entry_id)
         for identifier in device.identifiers
-        if identifier[0] == GPL_DOMAIN
     }
     if not dev_ids:
         return
@@ -116,11 +116,6 @@ class GPSLoggerEntity(TrackerEntity, RestoreEntity):
             identifiers={(GPL_DOMAIN, self._unique_id)},
             name=self._name,
         )
-
-    @property
-    def source_type(self) -> SourceType:
-        """Return the source type, eg gps or router, of the device."""
-        return SourceType.GPS
 
     async def async_added_to_hass(self) -> None:
         """Register state update callback."""

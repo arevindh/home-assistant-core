@@ -1,20 +1,22 @@
 """Adds config flow for Workday integration."""
+
 from __future__ import annotations
 
 from functools import partial
 from typing import Any
 
-from holidays import HolidayBase, country_holidays, list_supported_countries
+from holidays import PUBLIC, HolidayBase, country_holidays, list_supported_countries
 import voluptuous as vol
 
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
+    ConfigFlowResult,
     OptionsFlowWithConfigEntry,
 )
 from homeassistant.const import CONF_COUNTRY, CONF_LANGUAGE, CONF_NAME
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import AbortFlow, FlowResult
+from homeassistant.data_entry_flow import AbortFlow
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.selector import (
     CountrySelector,
@@ -34,6 +36,7 @@ from homeassistant.util import dt as dt_util
 from .const import (
     ALLOWED_DAYS,
     CONF_ADD_HOLIDAYS,
+    CONF_CATEGORY,
     CONF_EXCLUDES,
     CONF_OFFSET,
     CONF_PROVINCE,
@@ -64,9 +67,7 @@ def add_province_and_language_to_schema(
     _country = country_holidays(country=country)
     if country_default_language := (_country.default_language):
         selectable_languages = _country.supported_languages
-        new_selectable_languages = []
-        for lang in selectable_languages:
-            new_selectable_languages.append(lang[:2])
+        new_selectable_languages = [lang[:2] for lang in selectable_languages]
         language_schema = {
             vol.Optional(
                 CONF_LANGUAGE, default=country_default_language
@@ -86,7 +87,29 @@ def add_province_and_language_to_schema(
             ),
         }
 
-    return vol.Schema({**DATA_SCHEMA_OPT.schema, **language_schema, **province_schema})
+    category_schema = {}
+    # PUBLIC will always be included and can therefore not be set/removed
+    _categories = [x for x in _country.supported_categories if x != PUBLIC]
+    if _categories:
+        category_schema = {
+            vol.Optional(CONF_CATEGORY): SelectSelector(
+                SelectSelectorConfig(
+                    options=_categories,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    multiple=True,
+                    translation_key=CONF_CATEGORY,
+                )
+            ),
+        }
+
+    return vol.Schema(
+        {
+            **DATA_SCHEMA_OPT.schema,
+            **language_schema,
+            **province_schema,
+            **category_schema,
+        }
+    )
 
 
 def _is_valid_date_range(check_date: str, error: type[HomeAssistantError]) -> bool:
@@ -200,7 +223,7 @@ class WorkdayConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the user initial step."""
         errors: dict[str, str] = {}
 
@@ -228,7 +251,7 @@ class WorkdayConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_options(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle remaining flow."""
         errors: dict[str, str] = {}
         if user_input is not None:
@@ -256,6 +279,8 @@ class WorkdayConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_REMOVE_HOLIDAYS: combined_input[CONF_REMOVE_HOLIDAYS],
                 CONF_PROVINCE: combined_input.get(CONF_PROVINCE),
             }
+            if CONF_CATEGORY in combined_input:
+                abort_match[CONF_CATEGORY] = combined_input[CONF_CATEGORY]
             LOGGER.debug("abort_check in options with %s", combined_input)
             self._async_abort_entries_match(abort_match)
 
@@ -290,7 +315,7 @@ class WorkdayOptionsFlowHandler(OptionsFlowWithConfigEntry):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage Workday options."""
         errors: dict[str, str] = {}
 
@@ -314,18 +339,19 @@ class WorkdayOptionsFlowHandler(OptionsFlowWithConfigEntry):
                 errors["remove_holidays"] = "remove_holiday_range_error"
             else:
                 LOGGER.debug("abort_check in options with %s", combined_input)
+                abort_match = {
+                    CONF_COUNTRY: self._config_entry.options.get(CONF_COUNTRY),
+                    CONF_EXCLUDES: combined_input[CONF_EXCLUDES],
+                    CONF_OFFSET: combined_input[CONF_OFFSET],
+                    CONF_WORKDAYS: combined_input[CONF_WORKDAYS],
+                    CONF_ADD_HOLIDAYS: combined_input[CONF_ADD_HOLIDAYS],
+                    CONF_REMOVE_HOLIDAYS: combined_input[CONF_REMOVE_HOLIDAYS],
+                    CONF_PROVINCE: combined_input.get(CONF_PROVINCE),
+                }
+                if CONF_CATEGORY in combined_input:
+                    abort_match[CONF_CATEGORY] = combined_input[CONF_CATEGORY]
                 try:
-                    self._async_abort_entries_match(
-                        {
-                            CONF_COUNTRY: self._config_entry.options.get(CONF_COUNTRY),
-                            CONF_EXCLUDES: combined_input[CONF_EXCLUDES],
-                            CONF_OFFSET: combined_input[CONF_OFFSET],
-                            CONF_WORKDAYS: combined_input[CONF_WORKDAYS],
-                            CONF_ADD_HOLIDAYS: combined_input[CONF_ADD_HOLIDAYS],
-                            CONF_REMOVE_HOLIDAYS: combined_input[CONF_REMOVE_HOLIDAYS],
-                            CONF_PROVINCE: combined_input.get(CONF_PROVINCE),
-                        }
-                    )
+                    self._async_abort_entries_match(abort_match)
                 except AbortFlow as err:
                     errors = {"base": err.reason}
                 else:
